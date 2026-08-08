@@ -1,5 +1,5 @@
 {
-  "name": "@emsweb/climate-location-market-enterprise",
+  "name": "@causeway-services/climate-location-market-service",
   "version": "0.1.2",
   "private": true,
   "type": "module",
