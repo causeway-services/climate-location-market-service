@@ -1,0 +1,12 @@
+{
+  "status": "refused-until-market-counterparties-and-verifiers",
+  "dryClearing": "granted-for-explicit-test-contracts",
+  "liveClearing": "refused",
+  "leaderInputsStillRequired": [
+    "admit authenticated ActivityStreams delivery verifiers",
+    "admit a geocoder/place-identity provider",
+    "admit x402 payment-commitment and settlement-receipt verifiers",
+    "set opening and closing times for each daily market epoch"
+  ],
+  "neverEvidence": "A clearing is not payment settlement, research delivery, source truth, editorial approval, video production, or publication."
+}
