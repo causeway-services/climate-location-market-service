@@ -21,5 +21,9 @@
     "market",
     "climate"
   ],
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/causeway-services/climate-location-market-service.git"
+  }
 }
