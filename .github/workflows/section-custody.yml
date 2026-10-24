@@ -1,0 +1,52 @@
+name: section-custody
+
+# This repository is a Public section. It holds the data that parameterizes Operations for external publics, never executable source: Red Cup Engineering
+# holds every implementation. The 561 Group's rule:
+# https://github.com/561-group/561-group-services-section/blob/main/lib/agency/rules/science-engineering-operations-parameterize-in-order.json
+# This check fails any push or pull request that adds or changes executable source.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Refuse executable source in a Public section
+        id: check
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then exit 0; fi
+          code=$(git diff --name-only --diff-filter=AMR "$BASE" "$HEAD" \
+            | grep -E '\.(mjs|cjs|js|jsx|mts|cts|ts|tsx|py|sh|bash|rb|go|rs|scm|el|lua|php|pl|rkt|fnl)$' \
+            | grep -Ev '(^|/)(node_modules|pagefind)/' || true)
+          if [ -n "$code" ]; then
+            echo "files<<EOF" >> "$GITHUB_OUTPUT"; echo "$code" >> "$GITHUB_OUTPUT"; echo "EOF" >> "$GITHUB_OUTPUT"
+            echo "$code" | while read -r f; do echo "::error file=$f::Executable source in a Public section. Build it at its Red Cup Engineering owner and reference it from this section's data."; done
+            exit 1
+          fi
+      - name: Explain on the pull request
+        if: failure() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FILES: ${{ steps.check.outputs.files }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" --repo "${{ github.repository }}" --body "This pull request adds executable source to a Public section:
+
+          \`\`\`
+          $FILES
+          \`\`\`
+
+          Public sections hold the data that parameterizes Operations for external publics. Put the code in its Red Cup Engineering owner (\`*-engineering-services-section\`) and reference it from this section's data. Rule: [science-engineering-operations-parameterize-in-order](https://github.com/561-group/561-group-services-section/blob/main/lib/agency/rules/science-engineering-operations-parameterize-in-order.json)."
